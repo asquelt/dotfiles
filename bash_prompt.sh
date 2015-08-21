@@ -167,7 +167,6 @@ function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"; }
 
 alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'app' || echo 'top_cpu')"
 
-if alias whowasi >/dev/null 2>/dev/null ; then
 # mco - discovery timeout: 10s, job timeout: 20s
 export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 
@@ -187,7 +186,7 @@ if [ ! -z "$PS1_MYNAME" ] && [ "$LOGNAME" != "$PS1_MYNAME" ] ; then
     HISTFILE=~/.bash_history_$PS1_MYNAME
 
     [ -f /home/$PS1_MYNAME/.vimrc ] && VIMRC=/home/$PS1_MYNAME/.vimrc
-    alias vim="ORIG_LOGNAME=\"$LOGNAME\" LOGNAME=\"$PS1_MYNAME\" MYVIMRC=\"$VIMRC\" vim -c \"$VIMOPTS\""
+    alias vim="ORIG_LOGNAME=\"$LOGNAME\" LOGNAME=\"$PS1_MYNAME\" MYVIMRC=\"$VIMRC\" vim -u \"$VIMRC\" -c \"$VIMOPTS\""
 else
     alias vim="vim -c \"$VIMOPTS\""
 fi

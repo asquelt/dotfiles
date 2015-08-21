@@ -7,9 +7,10 @@ it's rather a backup, than something that you might want to reuse.
 
 should word on mac and linux (ubuntu).
 
-* `bash_prompt` - color your life + some random functs
-* `bashrc` - some more random functs
-* `dircolors` - colors for ls
-* `gitconfig` - colors for git
-* `screenrc` - colors (and stuff) for screen
-* `vimrc` - random vim stuff (and colors)
+* `bash_prompt.sh` (-> `~/.bash_prompt`) - color your life + some random functs
+* `bashrc.sh` (-> `~/.bashrc`) - some more random functs
+* `dircolors` (-> `~/.dircolors`) - colors for ls
+* `gitconfig` (-> `~/.gitconfig`) - colors for git
+* `keyboard` (-> `/etc/default/keyboard`) - get rid of caps
+* `screenrc` (-> `~/screenrc`) - colors (and stuff) for screen
+* `vimrc` (-> `~/.vimrc`) - random vim stuff (and colors)

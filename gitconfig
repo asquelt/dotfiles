@@ -1,0 +1,61 @@
+[color]
+    ui = auto
+# some visible colors for diff
+[color "branch"]
+    current = yellow reverse
+    local = yellow
+    remote = green
+[color "diff"]
+    commit = cyan bold
+    meta = yellow
+    frag = magenta bold
+    old = red
+    new = green
+    whitespace = red reverse
+[color "status"]
+    added = yellow
+    changed = green
+    untracked = cyan
+
+[core]
+    whitespace=fix,-indent-with-non-tab,trailing-space,cr-at-eol # show whitespace "problems"
+    pager = less -X -F # set pager ( default is whatever system default pager is )
+    editor = vim # default editor ( default is $EDITOR, or if not defined default editor in distro)
+
+# some sane defaults for branching and pushing
+[push]
+    default = current #push only current branch to avoid mistakes
+
+[branch]
+    autosetupmerge = true # set up new branches to automatically track remote ones
+
+# -S means sign commit with GPG key
+[alias]
+    #l = !"(git sync && git ll $*)|less -X -F -R # "
+    #ll = !"git log --color=always --abbrev-commit --relative-date --format='=== %Cred%h%Creset sign:%G? %Cgreen%aN %Cblue%x09%ai [%ar] %Creset %s' $* | perl -MTerm::ANSIColor -p -e 's/sign:(.)/$c=(\"$1\"=~\"([GU])\")?\"yellow\":\"magenta\";$c=(\"$1\"=~\"([U])\")?\"red\":$c;colored [$c], \"$1\"/e;s/($ENV{LOGNAME}|#?\\d{16})/colored [\"cyan\"], \"$1\"/ge' | less -X -F -R # "
+    l = !"f() { (git sync && git ll $*)|less -X -F -R ; } ; f "
+    ll = !"f() { git log --color=always --abbrev-commit --no-prefix --relative-date --format='=== %Cred%h%Creset sign:%G? %Cgreen%aN %Cblue%x09%ai [%ar] %Creset %s' $* | perl -MTerm::ANSIColor -p -e 's/ sign:.G. / /;s/sign:(.)/$c=(\"$1\"=~\"([GU])\")?\"yellow\":\"magenta\";$c=(\"$1\"=~\"([U])\")?\"red\":$c;colored [$c], \"$1\"/e;s/($ENV{LOGNAME}|#?\\d{16})/colored [\"cyan\"], \"$1\"/ge' | less -X -F -R ; } ; f "
+    today = !"git l --since=$(date +%Y-%m-%dT00:00)"
+    yesterday = !"git ll --until=$(date +%Y-%m-%dT00:00) --since=$(date -d '-1 day' +%Y-%m-%dT00:00)"
+    week = !"git ll --since=$(date -d '-7 day' +%Y-%m-%dT00:00)"
+    co = checkout
+    c = commit --verbose -e
+    ci = commit --verbose -e -a
+    cis = commit --verbose -e -a -S # -S - sign commit with GPG key
+    sync = !"(git pull && git push -u && /bin/echo -en 'Success\n\n') 2>&1" # bang! means shell command, else it defaults to git commands only
+    wip = !"f() { s=\"$*\" ; if [ ! -z \"$s\" ] ; then echo \"finding($s)\" ; git stash list stash^{/$s} -p ; else git stash list ; fi }; f"
+    wipshow = !"f() { s=\"$*\" ; if [ ! -z \"$s\" ] ; then echo \"finding($s)\" ; git stash show stash^{/$s} -p ; else git stash show ; fi }; f"
+    wipload = !"f() { s=\"$*\" ; if [ ! -z \"$s\" ] ; then echo \"finding($s)\" ; git stash pop stash^{/$s} ; else git stash show ; fi }; f"
+    wipsave = stash save
+    rmbranch = removebranch # script in /usr/libexec/git-core/git-removebranch
+    rollback = !"git revert -e -n $* && git ci # "
+    index = !"ctags -R -f ./.git/tags ."
+    refs = for-each-ref --format='%(authorname) %09 %(refname) %09 %(committerdate)'
+    asq =!"git config user.name asquelt && git config user.email asq@asq.art.pl && echo \"GIT author set to asquelt <asq@asq.art.pl>\""
+
+# software to use with 'git mergetool' command
+[merge]
+    tool = vimdiff
+
+[diff]
+    noprefix = true

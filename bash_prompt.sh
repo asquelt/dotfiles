@@ -163,26 +163,16 @@ else
   PROMPT_COMMAND="$PROMPT_COMMAND; timer_stop"
 fi
 
-export HISTSIZE=10000
-
 function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"; }
 
 alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'app' || echo 'top_cpu')"
 
-VIMOPTS="set fenc=utf-8"
-
 if alias whowasi >/dev/null 2>/dev/null ; then
-    ORIGPWNAM=$(whowasi)
-    [ -f /home/$ORIGPWNAM/.vimrc ] && VIMRC=/home/$ORIGPWNAM/.vimrc
-    alias vim="ORIG_LOGNAME=\"$LOGNAME\" LOGNAME=\"$ORIGPWNAM\" MYVIMRC=\"$VIMRC\" vim -c \"$VIMOPTS\""
-else
-    alias vim="vim -c \"$VIMOPTS\""
-fi
-
 # mco - discovery timeout: 10s, job timeout: 20s
 export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 
 # history control
+export HISTSIZE=10000
 HISTFILESIZE=50000
 HISTSIZE=$HISTFILESIZE
 HISTIGNORE=reboot*:halt*:shutdown*:pd\ *:rm\ -rf\ /*
@@ -190,8 +180,15 @@ HISTCONTROL=ignorespace
 HISTTIMEFORMAT="%Y-%m-%d %H:%M:%S "
 alias exit-without-history='kill -9 $$'
 
+VIMOPTS="set fenc=utf-8"
+
 if [ ! -z "$PS1_MYNAME" ] && [ "$LOGNAME" != "$PS1_MYNAME" ] ; then
     [ ! -f ~/.bash_history_$PS1_MYNAME ] && [ -f ~/.bash_history ] && cat ~/.bash_history | egrep -v "($(echo "$HISTIGNORE"|sed -e 's/*/.*/g' -e 's/:/|/g'))" > ~/.bash_history_$PS1_MYNAME && echo "History file ~/.bash_history_$PS1_MYNAME initiated, please relogin!" && exit
     HISTFILE=~/.bash_history_$PS1_MYNAME
+
+    [ -f /home/$PS1_MYNAME/.vimrc ] && VIMRC=/home/$PS1_MYNAME/.vimrc
+    alias vim="ORIG_LOGNAME=\"$LOGNAME\" LOGNAME=\"$PS1_MYNAME\" MYVIMRC=\"$VIMRC\" vim -c \"$VIMOPTS\""
+else
+    alias vim="vim -c \"$VIMOPTS\""
 fi
 

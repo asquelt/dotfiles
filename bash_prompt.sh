@@ -163,7 +163,7 @@ else
   PROMPT_COMMAND="$PROMPT_COMMAND; timer_stop"
 fi
 
-function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"; }
+function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"|less -X -E -R; }
 
 alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'app' || echo 'top_cpu')"
 

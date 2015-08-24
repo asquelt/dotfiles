@@ -343,7 +343,7 @@ ratom() {
 }
 
 varnishncsa_hitmiss() {
-    varnishncsa -F "%{Host}i %h %l %u %t \"%r\" %s %b \"%{Referer}i\" \"%{User-agent}i\" %{Varnish:hitmiss}x %{VCL_Log:objhits}x %{X-Forwarded-For}i" $@
+    varnishncsa -F "%{Host}i %h/%{X-Remote-Addr}i %l %u %t \"%r\" %s %b \"%{Referer}i\" \"%{User-agent}i\" %{Varnish:hitmiss}x(%{VCL_Log:objhits}x)" $@
 }
 
 alias sshquit="ssh -O exit"

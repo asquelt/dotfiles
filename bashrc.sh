@@ -211,13 +211,29 @@ _sshhosts() {
     return 0
 }
 
+_updatetitle() {
+    case $TERM in
+        screen*)
+            echo -en "\ek$*\e\\"
+            ;;
+        xterm*)
+            echo -en "\033]0;$*\007"
+            ;;
+    esac
+    case $COLORTERM in
+        xfce*)
+            echo -en "\033]0;$*\007"
+            ;;
+    esac
+}
+
 ssh() {
     ssh=$(which ssh 2>/dev/null)
-    [ "x$TERM" == "xscreen" ] && echo -n "k$* (rsync)\\"
+    _updatetitle "$* (rsync)"
     rsync -ah .bashrc .vimrc .vim .bash_prompt bash_prompt-$LOGNAME .dircolors .gitconfig gitconfig-$LOGNAME .screenrc ${@: -1}:$HOME 2>/dev/null
-    [ "x$TERM" == "xscreen" ] && echo -n "k$* (ssh)\\"
+    _updatetitle "$* (ssh)"
     $ssh $*
-    [ "x$TERM" == "xscreen" ] && echo -n "kbash\\"
+    _updatetitle "-bash"
 }
 
 sudo() {

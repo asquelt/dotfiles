@@ -346,6 +346,14 @@ varnishncsa_hitmiss() {
     varnishncsa -F "%{Host}i %h/%{X-Remote-Addr}i %l %u %t \"%r\" %s %b \"%{Referer}i\" \"%{User-agent}i\" %{Varnish:hitmiss}x(%{VCL_Log:objhits}x)" $@
 }
 
+gitio() {
+    url="foo=bar"
+    code="foo=baz"
+    [ ! -z "$1" ] && url="url=$1"
+    [ ! -z "$2" ] && code="code=$2"
+    curl -i http://git.io -F "$url" -F "$code"
+}
+
 alias sshquit="ssh -O exit"
 alias sshremove="ssh-keygen -f "$HOME/.ssh/known_hosts" -R"
 
@@ -371,4 +379,11 @@ export PATH="$PATH:$HOME/.rvm/bin" # Add RVM to PATH for scripting
 
 export GOPATH=$HOME/golang
 export PATH=$GOPATH:$GOPATH/bin:$PATH
+
+function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"|less -X -E -R; }
+
+alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'app' || echo 'top_cpu')"
+
+# mco - discovery timeout: 10s, job timeout: 20s
+export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 

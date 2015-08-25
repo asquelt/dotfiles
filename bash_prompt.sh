@@ -2,21 +2,24 @@
 
 #set -x
 
-# puppet managed file, for more info 'puppet-find-resources $filename'
-# BEFORE YOU MAKE ANY CHANGES, READ https://stonka.non.3dart.com/wiki/wiki/Puppet#Zarz.C4.85dzanie_konfiguracjami
+# latest version of this file is available online: http://git.io/~asq/prompt
 
+# if git completion is not available make sure that PS1 won't return any errors
 __git_ps1 () {
     true
 }
 
+# fast check whether directory we're currently in is git repo
 __gitdir () {
     git rev-parse --git-dir --is-inside-git-dir --is-bare-repository --is-inside-work-tree --short HEAD 2>/dev/null
 }
 
+# include git completion script
 [ -f /etc/bash_completion.d/git ] && source /etc/bash_completion.d/git
 [ -f /usr/share/git-core/contrib/completion/git-prompt.sh ] && source /usr/share/git-core/contrib/completion/git-prompt.sh
 [ -f /etc/bash_completion.d/git-prompt ] && source /etc/bash_completion.d/git-prompt
 
+# check uid of parent process (useful to check who called su/sudo)
 getprocuid() {
     callerid=$(id -u)
     process=$1
@@ -38,6 +41,18 @@ getprocuid() {
     fi
 }
 
+# get cpu count to calculate load average danger threshold
+ps1_countcpu() {
+    cpu=0
+    while read key nil ; do
+        if [ "$key" == "processor" ] ; then
+            ((cpu=cpu+1))
+        fi
+    done < /proc/cpuinfo
+    echo $cpu
+}
+
+# install this script to root user dotfiles
 root_ps1_init() {
     _d="/home/$PS1_MYNAME/.bashrc /home/$PS1_MYNAME/.bash_prompt"
     for _f in $_d ; do
@@ -73,14 +88,66 @@ export GIT_PS1_SHOWSTASHSTATE=1
 export GIT_PS1_SHOWUPSTREAM="verbose"
 export GIT_PS1_DESCRIBE_STYLE="branch"
 
-#export no_processors=$(cat /proc/cpuinfo | grep ^processor|wc -l)
+export no_processors=$(ps1_countcpu)
 
-export PS1='\[\e[1;32m\]$(timer_show 2>/dev/null)\[\e[1;31m\]$(ps1_exitcodes 2>/dev/null)$([ -z "$PS1_MYNAME" ] && echo "*** Root PS1 is only partly initialized, please exit sudo session and run \"root_ps1_init\" to complete! *** ")\[\e[0m\]\[\e[0;1;30m\]${STY#*.}$((read uptime crap ; if [ ${uptime%.*} -lt 3600 ] ; then echo -ne "\[\e[1;36m\]BOOT\[\e[0;1;30m\] " ; fi ) </proc/uptime)$((read load crap ; export no_processors=$(cat /proc/cpuinfo | grep ^processor|wc -l) ; if [ ${load%.*} -gt $((no_processors*4)) ] ; then echo -ne "\[\e[1;31m\]HIGH " ; fi ; if [ ${load%.*} -gt $((no_processors*2)) ] ; then echo -ne "\[\e[1;31m\]LOAD" ; fi ; if [ ${load%.*} -gt $no_processors ] ; then echo -ne "\[\e[1;33m\]" ; fi ; echo -ne "<${load%.*}>") </proc/loadavg)$( if [ $UID -eq 0 ] ; then echo -ne "\[\e[0;31m\]" ; else echo -ne "\[\e[0;32m\]" ; fi )\u\[\e[0;1;30m\]@\[\e[0;35m\]\h$([ -r /home/$PS1_MYNAME/NICKNAME ] && (read nick ; echo -ne "\[\e[1;35m\]/\[\e[0;35m\]$nick") </home/$PS1_MYNAME/NICKNAME )\[\e[0;1;30m\](\[\e[0m\]\#\[\e[0;1;30m\]$(gitmagic echo "| " 2>/dev/null)\[$(gitmagic pre 2>/dev/null)\]$(gitmagic 2>/dev/null)\[$(gitmagic post 2>/dev/null)\])\[\e[0;35m\]\w\[\e[0;1;30m\]\\$\[\e[0m\] '
+export reset="\e[0m"
+export black="\e[1;30m"
+export gray="\e[0;1;30m"
+export blue="\e[1;34m"
+export cyan="\e[1;36m"
+export green="\e[1;32m"
+export lime="\e[0;32m"
+export orange="\e[1;33m"
+export purple="\e[1;35m"
+export red="\e[0;31m"
+export redalert="\e[1;31m"
+export violet="\e[0;35m"
+export white="\e[1;37m"
+export yellow="\e[1;33m"
 
-export PS2='\[\e[0;1;30m\]> \[\e[0m\]'
+PS1="" # reset prompt
+PS1+="\[${reset}\]" # reset all colors
+PS1+="\[${gray}\]\$(ps1_setcol0)" # if previous command wrote no newline, reset it for readibility
+PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
+PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero
+PS1+="\$([ -z "\$PS1_MYNAME" ] && echo \"\[${redalert}\]*** Root PS1 is only partly initialized, please exit sudo session and run 'root_ps1_init' to complete! *** \[${reset}\]\")" # warn about root_ps1_init not being run
+PS1+="\[${gray}\]\${STY#*.}" # show stty number or name (screen)
+PS1+="\$((read uptime crap ; if [ \${uptime%.*} -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi ) </proc/uptime)" # warn if recently rebooted
+PS1+="\$((read load crap ; if [ \${load%.*} -gt \$((no_processors*4)) ] ; then echo -ne \"\[${redalert}\]HIGH \" ; fi ; if [ \${load%.*} -gt \$((no_processors*2)) ] ; then echo -ne \"\[${redalert}\]LOAD\" ; fi ; if [ \${load%.*} -gt \$no_processors ] ; then echo -ne \"\[${orange}\]\" ; fi ; echo -ne \"<\${load%.*}>\") </proc/loadavg)" # warn about high load
+PS1+="\[${reset}\]" # reset all colors
+PS1+="\$( if [ \$UID -eq 0 ] ; then echo -ne \"\[${red}\]\" ; else echo -ne \"\[${lime}\]\" ; fi )\u" # show username - if root highlight in red (\u = username)
+PS1+="\[${gray}\]@\[${violet}\]\h\$([ -r /home/\$PS1_MYNAME/NICKNAME ] && (read nick ; echo -ne \"\[${purple}\]/\[${violet}\]\$nick\") </home/\$PS1_MYNAME/NICKNAME )" # show hostname and nickname (role) if present (\h = hostname)
+PS1+="\[${gray}\](\[${reset}\]\#\[${gray}\]" # show command number in history (\# = number in history)
+PS1+="\$(gitmagic echo \"| \" 2>/dev/null)\[\$(gitmagic pre 2>/dev/null)\]\$(gitmagic 2>/dev/null)\[\$(gitmagic post 2>/dev/null)\])" # if this is git repo then add branch and commit hints
+PS1+="\[${violet}\]\w\[${gray}\]\\$" # always end path with dollar ($) so we can easily copy it with mouse double click (\w = path relative to home)
+PS1+="\[${reset}\]" # reset all colors
+PS1+=" " # add space for readability
+
+export PS1
+
+export PS2="\[${gray}\]> \[${reset}\]"
 
 #export PS4="<$LINENO>+ "
 export PS4="+ "
+
+ps1_setcol0() {
+    # https://unix.stackexchange.com/questions/88296/get-vertical-cursor-position
+    exec < /dev/tty
+    oldstty=$(stty -g)
+    stty raw -echo min 0
+    # on my system, the following line can be replaced by the line below it
+    echo -en "\033[6n" > /dev/tty
+    # tput u7 > /dev/tty    # when TERM=xterm (and relatives)
+    IFS=';' read -r -d R -a pos
+    stty $oldstty
+    # change from one-based to zero based so they work with: tput cup $row $col
+    row=$((${pos[0]:2} - 1))    # strip off the esc-[
+    col=$((${pos[1]} - 1))
+
+    if [ $col -ne 0 ] ; then
+        echo -en "\n(no n/l) "
+    fi
+}
 
 ps1_exitcode() {
     ret=$?
@@ -101,8 +168,8 @@ ps1_exitcodes() {
 }
 
 gitmagic() {
-    gitpre="\e[0;32m"
-    gitpost="\e[0;1;30m"
+    gitpre="${lime}"
+    gitpost="${gray}"
 
     if [ ! -z "$(__gitdir)" ]; then
         if [ "$1" == "echo" ] ; then
@@ -112,19 +179,19 @@ gitmagic() {
         else
             gitprompt=$(__git_ps1 "%s")
             if [[ "$gitprompt" =~ "%" ]]; then # there are unadded files
-                gitpre="\e[1;36m"
+                gitpre="${cyan}"
                 gitmsg="add "
             elif [[ "$gitprompt" =~ "*" ]]; then # there are local changes
-                gitpre="\e[1;33m"
+                gitpre="${orange}"
                 gitmsg="commit "
             elif [[ "$gitprompt" =~ "u+" ]]; then # you are ahead of origin
-                gitpre="\e[1;31m"
+                gitpre="${redalert}"
                 gitmsg="push "
             elif [[ "$gitprompt" =~ "u-" ]]; then # you are behind origin
-                gitpre="\e[1;35m"
+                gitpre="${purple}"
                 gitmsg="pull "
             elif [[ "$gitprompt" =~ "\$" ]]; then # there are stashes
-                gitpre="\e[1;30m"
+                gitpre="${black}"
             fi
             if [ "$1" == "pre" ] ; then
                 echo -en "$gitpre"
@@ -148,9 +215,25 @@ function timer_stop {
   unset timer
 }
 
+function timer_convertsecs() {
+   ((d=${1}/86400))
+   ((h=${1}/3600))
+   ((m=(${1}%3600)/60))
+   ((s=${1}%60))
+   if [ $d -gt 0 ] ; then
+      printf "%dd %dh %dm %ds" $d $h $m $s
+   elif [ $h -gt 0 ] ; then
+      printf "%dh %dm %ds" $h $m $s
+   elif [ $m -gt 0 ] ; then
+      printf "%dm %ds" $m $s
+   else
+      printf "%ds" $s
+   fi
+}
+
 function timer_show {
   if [ ! -z "$timer_show" ] && [ $timer_show -gt 0 ] ; then
-    echo -en "(LAST:${timer_show}s) "
+    echo -en "(LAST:$(timer_convertsecs $timer_show)) "
   fi
 }
 
@@ -162,13 +245,6 @@ else
   # this must be last command ran before prompt (http://jakemccrary.com/blog/2015/05/03/put-the-last-commands-run-time-in-your-bash-prompt/)
   PROMPT_COMMAND="$PROMPT_COMMAND; timer_stop"
 fi
-
-function pxs() {  ps axuwwwf|egrep "^USER|$*"|grep -v "grep .*$*"|less -X -E -R; }
-
-alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'app' || echo 'top_cpu')"
-
-# mco - discovery timeout: 10s, job timeout: 20s
-export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 
 # history control
 export HISTSIZE=10000

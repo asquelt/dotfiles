@@ -1,0 +1,19 @@
+Host *
+    #User <username>
+    # now we have aladdin with confirmation: ssh-add -c -s /usr/lib/opensc-pkcs11.so
+    # it's (relatively) safe to forward ssh-agent socket to remote parties
+    ForwardAgent yes
+    #PKCS11Provider /usr/lib/opensc-pkcs11.so
+    # from http://sysadvent.blogspot.com/2013/12/day-17-stupid-ssh-tricks.html
+    ServerAliveInterval 60
+    ServerAliveCountMax 10
+    TCPKeepAlive no
+    ControlMaster auto
+    ControlPath ~/.ssh/mux-%r@%h:%p
+    ControlPersist 4h
+    # visible hostnames in .ssh/known_hosts
+    HashKnownHosts no
+    # https://atom.io/packages/remote-atom
+    RemoteForward 52698 localhost:52698
+    # don't obfuscate .ssh/known_hosts
+    HashKnownHosts no

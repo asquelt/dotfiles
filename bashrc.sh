@@ -151,7 +151,7 @@ pwgen_pronanceable() {
 
 netto() {
     [ -z "$1" ] && exit
-    perl -e "printf(\"%d\n\",$1/1.22)"
+    perl -e "printf(\"%d\n\",$1/1.23)"
 }
 
 plus19() {
@@ -187,13 +187,27 @@ ykval() {
     done
 }
 
-sshsessions() {
-    COMPREPLY=($(\ls ~/.ssh/mux-*|awk -F/ '{print $NF}'|sed -e 's/^mux-//' -e "s/$LOGNAME@//" -e 's/:22$//'|egrep -o "^${COMP_WORDS[COMP_CWORD]}[^[:space:]]*"|while read x ; do ssh -O check $x >/dev/null 2>/dev/null && echo $x ; done|xargs))
+_sshsessions() {
+    COMPREPLY=($(\ls ~/.ssh/mux-*|awk -F/ '{print $NF}'|sed -e 's/^mux-//' -e "s/$LOGNAME@//" -e 's/:22$//'|egrep -o "^${COMP_WORDS[COMP_CWORD]}[^[:space:]]*"|xargs))
     return 0
 }
 
-sshhosts() {
-    COMPREPLY=($(grep -v "^ *#" ~/.ssh/known_hosts|grep "^[a-z].*,[0-9]*\."|grep -v "^dev[0-9]"|cut -f1 -d,|sort -u|egrep -o "^${COMP_WORDS[COMP_CWORD]}[^[:space:]]*"|xargs))
+ssh_check_active() {
+    sshsessions
+    for i in "${COMPREPLY[@]}" ; do
+        echo -n "$i: "
+        ssh -O check $i
+    done
+}
+
+_sshhosts() {
+    if [ -f ~/.ssh/known_hosts ] ; then
+        res+=$(grep -v "^ *#" ~/.ssh/known_hosts|grep "^[a-z].*,[0-9]*\."|grep -v "^dev[0-9]"|cut -f1 -d,)
+    fi
+    if [ -f ~/.ssh/config ] ; then
+        res+=$(grep -v "^ *#" ~/.ssh/config|grep -i ^host|awk '{print $NF}'|grep -v "^\*")
+    fi
+    COMPREPLY=($(echo "$res"|sort -u|egrep -o "^${COMP_WORDS[COMP_CWORD]}[^[:space:]]*"|xargs))
     return 0
 }
 
@@ -208,6 +222,7 @@ ssh() {
 
 sudo() {
     sudo=$(which sudo 2>/dev/null)
+    [ -z "$sudo" ] && sudo=/usr/bin/sudo
     if [ "$*" == "su -" ] ; then
         $sudo -i
     else
@@ -357,10 +372,10 @@ gitio() {
 alias sshquit="ssh -O exit"
 alias sshremove="ssh-keygen -f "$HOME/.ssh/known_hosts" -R"
 
-complete -F sshsessions sshquit
-complete -F sshhosts    ssh
-complete -F sshhosts    sshremove
-complete -F sshhosts    sshinit
+complete -F _sshsessions sshquit
+complete -F _sshhosts    ssh
+complete -F _sshhosts    sshremove
+complete -F _sshhosts    sshinit
 
 #eval `dircolors -b ~/.dircolors`
 alias ls='ls --color=always'

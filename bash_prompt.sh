@@ -107,7 +107,7 @@ export yellow="\e[1;33m"
 
 PS1="" # reset prompt
 PS1+="\[${reset}\]" # reset all colors
-PS1+="\[${gray}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
+PS1+="\[${cyan}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
 PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
 PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero
 PS1+="\$((read uptime crap ; if [ \${uptime%.*} -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi ) </proc/uptime)" # warn if recently rebooted (less than hour ago)

@@ -31,10 +31,11 @@
 
 # -S means sign commit with GPG key
 [alias]
-    #l = !"(git sync && git ll $*)|less -X -F -R # "
-    #ll = !"git log --color=always --abbrev-commit --relative-date --format='=== %Cred%h%Creset sign:%G? %Cgreen%aN %Cblue%x09%ai [%ar] %Creset %s' $* | perl -MTerm::ANSIColor -p -e 's/sign:(.)/$c=(\"$1\"=~\"([GU])\")?\"yellow\":\"magenta\";$c=(\"$1\"=~\"([U])\")?\"red\":$c;colored [$c], \"$1\"/e;s/($ENV{LOGNAME}|#?\\d{16})/colored [\"cyan\"], \"$1\"/ge' | less -X -F -R # "
     l = !"f() { (git sync && git ll $*)|less -X -F -R ; } ; f "
     ll = !"f() { git log --color=always --abbrev-commit --no-prefix --relative-date --format='=== %Cred%h%Creset sign:%G? %Cgreen%aN %Cblue%x09%ai [%ar] %Creset %s' $* | perl -MTerm::ANSIColor -p -e 's/ sign:.G. / /;s/sign:(.)/$c=(\"$1\"=~\"([GU])\")?\"yellow\":\"magenta\";$c=(\"$1\"=~\"([U])\")?\"red\":$c;colored [$c], \"$1\"/e;s/($ENV{LOGNAME}|#?\\d{16})/colored [\"cyan\"], \"$1\"/ge' | less -X -F -R ; } ; f "
+    ls-unsigned = !"f() { git log --pretty='format:%H|%aN|%s|%G?' \"${1:-HEAD}\" | grep -v \"|G$\" ; } ; f " # http://mikegerwitz.com/papers/git-horror-story#automate
+    ls-untrusted = !"f() { git log --pretty='format:%H|%aN|%s|%G?' \"${1:-HEAD}\" | grep \"|U$\" ; } ; f " # http://mikegerwitz.com/papers/git-horror-story#automate
+    show-signature = !"f() { git show --show-signature $* ; } ; f "
     today = !"git l --since=$(date +%Y-%m-%dT00:00)"
     yesterday = !"git ll --until=$(date +%Y-%m-%dT00:00) --since=$(date -d '-1 day' +%Y-%m-%dT00:00)"
     week = !"git ll --since=$(date -d '-7 day' +%Y-%m-%dT00:00)"

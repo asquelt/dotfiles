@@ -217,7 +217,7 @@ function timer_stop {
 
 function timer_convertsecs() {
    ((d=${1}/86400))
-   ((h=${1}/3600))
+   ((h=(${1}%86400)/3600))
    ((m=(${1}%3600)/60))
    ((s=${1}%60))
    if [ $d -gt 0 ] ; then

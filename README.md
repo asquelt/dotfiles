@@ -12,5 +12,7 @@ should word on mac and linux (ubuntu).
 * `dircolors` (-> `~/.dircolors`) - colors for ls
 * `gitconfig` (-> `~/.gitconfig`) - colors for git
 * `keyboard` (-> `/etc/default/keyboard`) - get rid of caps
+* `psqlrc` (-> `~/.psqlrc`) - postgresql client settings
 * `screenrc` (-> `~/screenrc`) - colors (and stuff) for screen
+* `sshconfig` (-> `~/.ssh/config`) - ssh agent, authentication and connection multiplexer config
 * `vimrc` (-> `~/.vimrc`) - random vim stuff (and colors)

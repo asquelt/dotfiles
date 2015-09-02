@@ -230,7 +230,7 @@ _updatetitle() {
 ssh() {
     ssh=$(which ssh 2>/dev/null)
     _updatetitle "$* (rsync)"
-    rsync -ah .bashrc .vimrc .vim .bash_prompt bash_prompt-$LOGNAME .dircolors .gitconfig gitconfig-$LOGNAME .screenrc ${@: -1}:$HOME 2>/dev/null
+    rsync -ah .bashrc .vimrc .vim .bash_prompt bash_prompt-$LOGNAME .dircolors .gitconfig gitconfig-$LOGNAME .screenrc .psqlrc ${@: -1}:$HOME 2>/dev/null
     _updatetitle "$* (ssh)"
     $ssh $*
     _updatetitle "-bash"
@@ -383,6 +383,11 @@ gitio() {
     [ ! -z "$1" ] && url="url=$1"
     [ ! -z "$2" ] && code="code=$2"
     curl -i http://git.io -F "$url" -F "$code"
+}
+
+psql() {
+    psql=$(which psql 2>/dev/null)
+    LESS="-iMSx4 -FX" PAGER=less $psql $*
 }
 
 alias sshquit="ssh -O exit"

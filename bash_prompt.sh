@@ -74,7 +74,7 @@ if [ "$LOGNAME" != "root" ] ; then
 elif [ ! -z "$SUDO_USER" ] ; then
     PS1_MYNAME="$SUDO_USER"
 else
-    PS1_MYNAME="$(getent passwd $(getprocuid $$))"
+    PS1_MYNAME="$(getent passwd $(getprocuid $$)|cut -f1 -d:)"
 fi
 
 export PS1_MYNAME

@@ -18,6 +18,7 @@ __gitdir () {
 [ -f /etc/bash_completion.d/git ] && source /etc/bash_completion.d/git
 [ -f /usr/share/git-core/contrib/completion/git-prompt.sh ] && source /usr/share/git-core/contrib/completion/git-prompt.sh
 [ -f /etc/bash_completion.d/git-prompt ] && source /etc/bash_completion.d/git-prompt
+[ -f /usr/local/etc/bash_completion.d/git-prompt.sh ] && source /usr/local/etc/bash_completion.d/git-prompt.sh
 
 # check uid of parent process (useful to check who called su/sudo)
 getprocuid() {
@@ -43,18 +44,53 @@ getprocuid() {
 
 # get cpu count to calculate load average danger threshold
 ps1_countcpu() {
-    cpu=0
-    while read key nil ; do
-        if [ "$key" == "processor" ] ; then
-            ((cpu=cpu+1))
-        fi
-    done < /proc/cpuinfo
-    echo $cpu
+    if syscpu=$(sysctl -n hw.ncpu 2>/dev/null) ; then
+        echo $syscpu
+    elif [ -f /proc/cpuinfo ] ; then
+        cpu=0
+        while read key nil ; do
+            if [ "$key" == "processor" ] ; then
+                ((cpu=cpu+1))
+            fi
+        done < /proc/cpuinfo
+        echo $cpu
+    else
+        echo 0
+    fi
+}
+
+# get uptime
+ps1_uptime() {
+    if sysupt=$(sysctl -n kern.boottime 2>/dev/null) ; then
+        sysupt=${sysupt%,*}
+        sysupt=${sysupt##* }
+        echo $sysupt
+    elif [ -f /proc/uptime ] ; then
+        read upt < /proc/uptime
+        echo ${upt%%.*}
+    else
+        echo 9999999
+    fi
+}
+
+# get loadavg
+ps1_loadavg() {
+    if sysload=$(sysctl -n vm.loadavg 2>/dev/null) ; then
+        sysload=${sysload%%,*}
+        sysload=${sysload##* }
+        echo $sysload
+    elif [ -f /proc/loadavg ] ; then
+        read load nil < /proc/loadavg
+        load=${load%%.*}
+        echo $load
+    else
+        echo -1
+    fi
 }
 
 # install this script to root user dotfiles
 root_ps1_init() {
-    _d="/home/$PS1_MYNAME/.bashrc /home/$PS1_MYNAME/.bash_prompt"
+    _d="$PS1_HOME/$PS1_MYNAME/.bashrc $PS1_HOME/$PS1_MYNAME/.bash_prompt"
     for _f in $_d ; do
         echo "Checking $_f in /root/.bashrc, please provide password if asked"
         res=$(sudo grep "$_f" /root/.bashrc)
@@ -77,7 +113,15 @@ else
     PS1_MYNAME="$(getent passwd $(getprocuid $$)|cut -f1 -d:)"
 fi
 
-export PS1_MYNAME
+if [ -d /Users ] ; then
+    PS1_HOME=/Users
+elif [ -d /home ] ; then
+    PS1_HOME=/Users
+else
+    PS1_HOME=~
+fi
+
+export PS1_MYNAME PS1_HOME
 
 # git PS1 features:
 export GIT_PS1_SHOWDIRTYSTATE=1
@@ -90,33 +134,39 @@ export GIT_PS1_DESCRIBE_STYLE="branch"
 
 export no_processors=$(ps1_countcpu)
 
-export reset="\e[0m"
-export black="\e[1;30m"
-export gray="\e[0;1;30m"
-export blue="\e[1;34m"
-export cyan="\e[1;36m"
-export green="\e[1;32m"
-export lime="\e[0;32m"
-export orange="\e[1;33m"
-export purple="\e[1;35m"
-export red="\e[0;31m"
-export redalert="\e[1;31m"
-export violet="\e[0;35m"
-export white="\e[1;37m"
-export yellow="\e[1;33m"
+if bash --version | grep -qi apple ; then
+    esc='\033'
+else
+    esc='\e'
+fi
+
+export reset="$esc[0m"
+export black="$esc[1;30m"
+export gray="$esc[0;1;30m"
+export blue="$esc[1;34m"
+export cyan="$esc[1;36m"
+export green="$esc[1;32m"
+export lime="$esc[0;32m"
+export orange="$esc[1;33m"
+export purple="$esc[1;35m"
+export red="$esc[0;31m"
+export redalert="$esc[1;31m"
+export violet="$esc[0;35m"
+export white="$esc[1;37m"
+export yellow="$esc[1;33m"
 
 PS1="" # reset prompt
 PS1+="\[${reset}\]" # reset all colors
 PS1+="\[${cyan}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
 PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
 PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero
-PS1+="\$((read uptime crap ; if [ \${uptime%.*} -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi ) </proc/uptime)" # warn if recently rebooted (less than hour ago)
+PS1+="\$(if [ \$(ps1_uptime 2>/dev/null) -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi )" # warn if recently rebooted (less than hour ago)
 PS1+="\$([ -z "\$PS1_MYNAME" ] && echo \"\[${redalert}\]*** Root PS1 is only partly initialized, please exit sudo session and run 'root_ps1_init' to complete! *** \[${reset}\]\")" # warn about root_ps1_init not being run
 PS1+="\[${gray}\]\${STY#*.}" # show stty number or name (screen)
-PS1+="\$((read load crap ; if [ \${load%.*} -gt \$((no_processors*4)) ] ; then echo -ne \"\[${redalert}\]HIGH \" ; fi ; if [ \${load%.*} -gt \$((no_processors*2)) ] ; then echo -ne \"\[${redalert}\]LOAD\" ; fi ; if [ \${load%.*} -gt \$((no_processors*1)) ] ; then echo -ne \"\[${orange}\]\" ; fi ; echo -ne \"<\${load%.*}>\") </proc/loadavg)" # display load, warn about high load (load > core count)
+PS1+="\$(load=\$(ps1_loadavg 2>/dev/null) ; if [ \${load%.*} -gt \$((no_processors*4)) ] ; then echo -ne \"\[${redalert}\]HIGH \" ; fi ; if [ \${load%.*} -gt \$((no_processors*2)) ] ; then echo -ne \"\[${redalert}\]LOAD\" ; fi ; if [ \${load%.*} -gt \$((no_processors*1)) ] ; then echo -ne \"\[${orange}\]\" ; fi ; echo -ne \"<\${load%.*}>\")" # display load, warn about high load (load > core count)
 PS1+="\[${reset}\]" # reset all colors
 PS1+="\$( if [ \$UID -eq 0 ] ; then echo -ne \"\[${red}\]\" ; else echo -ne \"\[${lime}\]\" ; fi )\u" # show username - if root highlight in red (\u = username)
-PS1+="\[${gray}\]@\[${violet}\]\h\$([ -r /home/\$PS1_MYNAME/NICKNAME ] && (read nick ; echo -ne \"\[${purple}\]/\[${violet}\]\$nick\") </home/\$PS1_MYNAME/NICKNAME )" # show hostname and nickname (role) if present (\h = hostname)
+PS1+="\[${gray}\]@\[${violet}\]\h\$([ -r $PS1_HOME/\$PS1_MYNAME/NICKNAME ] && (read nick ; echo -ne \"\[${purple}\]/\[${violet}\]\$nick\") <$PS1_HOME/\$PS1_MYNAME/NICKNAME )" # show hostname and nickname (role) if present (\h = hostname)
 PS1+="\[${gray}\](\[${reset}\]\#\[${gray}\]" # show command number in history (\# = number in history)
 PS1+="\$(gitmagic echo \"| \" 2>/dev/null)\[\$(gitmagic pre 2>/dev/null)\]\$(gitmagic 2>/dev/null)\[\$(gitmagic post 2>/dev/null)\])" # if this is git repo then add branch and commit hints
 PS1+="\[${violet}\]\w\[${gray}\]\\$" # always end path with dollar ($) so we can easily copy it with mouse double click (\w = path relative to home)
@@ -243,7 +293,8 @@ if [ "$PROMPT_COMMAND" == "" ]; then
   PROMPT_COMMAND="timer_stop"
 else
   # this must be last command ran before prompt (http://jakemccrary.com/blog/2015/05/03/put-the-last-commands-run-time-in-your-bash-prompt/)
-  PROMPT_COMMAND="$PROMPT_COMMAND; timer_stop"
+  ORIG_PROMPT_COMMAND=${PROMPT_COMMAND%;*}
+  PROMPT_COMMAND="$ORIG_PROMPT_COMMAND ; timer_stop"
 fi
 
 # history control
@@ -261,7 +312,7 @@ if [ ! -z "$PS1_MYNAME" ] && [ "$LOGNAME" != "$PS1_MYNAME" ] ; then
     [ ! -f ~/.bash_history_$PS1_MYNAME ] && [ -f ~/.bash_history ] && cat ~/.bash_history | egrep -v "($(echo "$HISTIGNORE"|sed -e 's/*/.*/g' -e 's/:/|/g'))" > ~/.bash_history_$PS1_MYNAME && echo "History file ~/.bash_history_$PS1_MYNAME initiated, please relogin!" && exit
     HISTFILE=~/.bash_history_$PS1_MYNAME
 
-    [ -f /home/$PS1_MYNAME/.vimrc ] && VIMRC=/home/$PS1_MYNAME/.vimrc
+    [ -f $PS1_HOME/$PS1_MYNAME/.vimrc ] && VIMRC=$PS1_HOME/$PS1_MYNAME/.vimrc
     alias vim="ORIG_LOGNAME=\"$LOGNAME\" LOGNAME=\"$PS1_MYNAME\" MYVIMRC=\"$VIMRC\" vim -u \"$VIMRC\" -c \"$VIMOPTS\""
 else
     alias vim="vim -c \"$VIMOPTS\""

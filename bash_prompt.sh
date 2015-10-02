@@ -293,7 +293,8 @@ if [ "$PROMPT_COMMAND" == "" ]; then
   PROMPT_COMMAND="timer_stop"
 else
   # this must be last command ran before prompt (http://jakemccrary.com/blog/2015/05/03/put-the-last-commands-run-time-in-your-bash-prompt/)
-  ORIG_PROMPT_COMMAND=${PROMPT_COMMAND%;*}
+  ORIG_PROMPT_COMMAND=${PROMPT_COMMAND/%; */}
+  ORIG_PROMPT_COMMAND=${ORIG_PROMPT_COMMAND/%;/}
   PROMPT_COMMAND="$ORIG_PROMPT_COMMAND ; timer_stop"
 fi
 

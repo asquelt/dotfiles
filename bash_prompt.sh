@@ -157,11 +157,12 @@ export yellow="$esc[1;33m"
 
 PS1="" # reset prompt
 PS1+="\[${reset}\]" # reset all colors
+PS1+="\$([ ! -z \"\$ASCIINEMA_REC\" ] && echo \"\[${redalert}\e[6m\]⬤ \")" # add a mark if we're recording this session
 PS1+="\[${cyan}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
 PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
 PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero
 PS1+="\$(if [ \$(ps1_uptime 2>/dev/null) -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi )" # warn if recently rebooted (less than hour ago)
-PS1+="\$([ -z "\$PS1_MYNAME" ] && echo \"\[${redalert}\]*** Root PS1 is only partly initialized, please exit sudo session and run 'root_ps1_init' to complete! *** \[${reset}\]\")" # warn about root_ps1_init not being run
+PS1+="\$([ -z \"\$PS1_MYNAME\" ] && echo \"\[${redalert}\]*** Root PS1 is only partly initialized, please exit sudo session and run 'root_ps1_init' to complete! *** \[${reset}\]\")" # warn about root_ps1_init not being run
 PS1+="\[${gray}\]\${STY#*.}" # show stty number or name (screen)
 PS1+="\$(load=\$(ps1_loadavg 2>/dev/null) ; if [ \${load%.*} -gt \$((no_processors*4)) ] ; then echo -ne \"\[${redalert}\]HIGH \" ; fi ; if [ \${load%.*} -gt \$((no_processors*2)) ] ; then echo -ne \"\[${redalert}\]LOAD\" ; fi ; if [ \${load%.*} -gt \$((no_processors*1)) ] ; then echo -ne \"\[${orange}\]\" ; fi ; echo -ne \"<\${load%.*}>\")" # display load, warn about high load (load > core count)
 PS1+="\[${reset}\]" # reset all colors

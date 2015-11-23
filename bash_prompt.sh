@@ -157,7 +157,7 @@ export yellow="$esc[1;33m"
 
 PS1="" # reset prompt
 PS1+="\[${reset}\]" # reset all colors
-PS1+="\$([ ! -z \"\$ASCIINEMA_REC\" ] && echo \"\[${redalert}\e[6m\]⬤ \")" # add a mark if we're recording this session
+PS1+="\$([ ! -z \"\$ASCIINEMA_REC\" ] && echo \"\[${redalert}\]⬤ \")" # add a mark if we're recording this session
 PS1+="\[${cyan}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
 PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
 PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero

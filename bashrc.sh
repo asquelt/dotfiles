@@ -392,6 +392,7 @@ psql() {
 
 alias sshquit="ssh -O exit"
 alias sshremove="ssh-keygen -f "$HOME/.ssh/known_hosts" -R"
+alias ssh-copy-id="/usr/bin/ssh-copy-id -oControlPath=/dev/null -oControlPersist=no -oControlMaster=no"
 
 complete -F _sshsessions sshquit
 complete -F _sshhosts    ssh

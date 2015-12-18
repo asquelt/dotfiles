@@ -53,6 +53,8 @@
     index = !"ctags -R -f ./.git/tags ."
     refs = for-each-ref --format='%(authorname) %09 %(refname) %09 %(committerdate)'
     asq =!"git config user.name asquelt && git config user.email asq@asq.art.pl && echo \"GIT author set to asquelt <asq@asq.art.pl>\""
+    pushall = !"f() { for i in $(git remote); do echo :git push $i $*; git push $i $*; done; } ; f"
+    pullall = !"f() { for i in $(git remote); do echo :git pull $i $*; git pull $i $*; done; } ; f"
 
 # software to use with 'git mergetool' command
 [merge]

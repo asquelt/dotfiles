@@ -16,3 +16,4 @@ should word on mac and linux (ubuntu).
 * `screenrc` (-> `~/screenrc`) - colors (and stuff) for screen
 * `sshconfig` (-> `~/.ssh/config`) - ssh agent, authentication and connection multiplexer config
 * `vimrc` (-> `~/.vimrc`) - random vim stuff (and colors)
+

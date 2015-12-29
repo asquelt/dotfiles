@@ -424,3 +424,6 @@ alias ds="dstat -tlampM $(lsb_release -r -s 2>/dev/null|grep -q '^5' && echo 'ap
 # mco - discovery timeout: 10s, job timeout: 20s
 export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 
+# https://docs.ansible.com/ansible/faq.html#how-do-i-disable-cowsay
+export ANSIBLE_NOCOWS=1
+

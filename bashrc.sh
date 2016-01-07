@@ -427,3 +427,6 @@ export MCOLLECTIVE_EXTRA_OPTS="--dt 10 -t 20"
 # https://docs.ansible.com/ansible/faq.html#how-do-i-disable-cowsay
 export ANSIBLE_NOCOWS=1
 
+# don't bug me about quoting arguments, in 99% of cases i don't need it
+alias shellcheck='shellcheck -e SC2086'
+

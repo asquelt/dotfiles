@@ -225,7 +225,7 @@ ps1_sshkey() {
             if ssh-add -l 2>/dev/null | egrep -q "$SSH_MATCH_KEY" ; then
                 [ -z "$1" ] && echo -en "🔓 "
             else
-                [ ! -z "$1" ] && echo -en "${red}🔒 "
+                [ ! -z "$1" ] && echo -en "🔒 "
             fi
         else
             [ ! -z "$1" ] && echo -en "✖ "

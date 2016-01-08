@@ -430,3 +430,6 @@ export ANSIBLE_NOCOWS=1
 # don't bug me about quoting arguments, in 99% of cases i don't need it
 alias shellcheck='shellcheck -e SC2086'
 
+# my smartcard (for prompt highlight with ps1_sshkey)
+export SSH_MATCH_KEY="cardno:000603507119"
+

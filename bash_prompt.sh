@@ -161,6 +161,7 @@ PS1+="\$([ ! -z \"\$ASCIINEMA_REC\" ] && echo \"\[${redalert}\]⬤ \")" # add a 
 PS1+="\[${cyan}\]\$(ps1_setcol0 2>/dev/null)" # if previous command wrote no newline, reset it for readibility
 PS1+="\[${green}\]\$(timer_show 2>/dev/null)" # show execution time of previous command if non-zero
 PS1+="\[${redalert}\]\$(ps1_exitcodes 2>/dev/null)" # show exit of previous command if non-zero
+PS1+="\[${lime}\]\$(ps1_sshkey 2>/dev/null)\[${red}\]\$(ps1_sshkey red 2>/dev/null)" # show if ssh key is present and unlocked
 PS1+="\$(if [ \$(ps1_uptime 2>/dev/null) -lt 3600 ] ; then echo -ne \"\[${cyan}\]BOOT\[${gray}\] \" ; fi )" # warn if recently rebooted (less than hour ago)
 PS1+="\$([ -z \"\$PS1_MYNAME\" ] && echo \"\[${redalert}\]*** Root PS1 is only partly initialized, please exit sudo session and run 'root_ps1_init' to complete! *** \[${reset}\]\")" # warn about root_ps1_init not being run
 PS1+="\[${gray}\]\${STY#*.}" # show stty number or name (screen)
@@ -215,6 +216,20 @@ ps1_exitcodes() {
     done
     if [ $sum -ne 0 ] ; then
         echo -en "(EXIT:$STR) "
+    fi
+}
+
+ps1_sshkey() {
+    if [ ! -z "$SSH_MATCH_KEY" ] ; then
+        if [ -S $SSH_AUTH_SOCK ] && [ ! -z "$SSH_AGENT_PID" ] && kill -0 $SSH_AGENT_PID ; then
+            if ssh-add -l 2>/dev/null | egrep -q "$SSH_MATCH_KEY" ; then
+                [ -z "$1" ] && echo -en "🔓 "
+            else
+                [ ! -z "$1" ] && echo -en "${red}🔒 "
+            fi
+        else
+            [ ! -z "$1" ] && echo -en "✖ "
+        fi
     fi
 }
 

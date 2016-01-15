@@ -222,7 +222,7 @@ ps1_exitcodes() {
 ps1_sshkey() {
     if [ ! -z "$SSH_MATCH_KEY" ] ; then
         if [ -S $SSH_AUTH_SOCK ] && [ ! -z "$SSH_AGENT_PID" ] && kill -0 $SSH_AGENT_PID ; then
-            if ssh-add -l 2>/dev/null | egrep -q "$SSH_MATCH_KEY" ; then
+            if timeout 1 ssh-add -l 2>/dev/null | egrep -q "$SSH_MATCH_KEY" ; then
                 [ -z "$1" ] && echo -en "🔓 "
             else
                 [ ! -z "$1" ] && echo -en "🔒 "

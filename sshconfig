@@ -17,3 +17,5 @@ Host *
     RemoteForward 52698 localhost:52698
     # don't obfuscate .ssh/known_hosts
     HashKnownHosts no
+    # http://www.openssh.com/txt/release-7.1p2
+    UseRoaming no

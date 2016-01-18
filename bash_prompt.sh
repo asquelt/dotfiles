@@ -220,7 +220,7 @@ ps1_exitcodes() {
 }
 
 ps1_sshkey() {
-    if [ ! -z "$SSH_MATCH_KEY" ] ; then
+    if [ ! -z "$SSH_MATCH_KEY" ] && which timeout >/dev/null 2>/dev/null ; then
         ssh_is_eliglible=''
         if [ ! -z "$SSH_AUTH_SOCK" ] && [ -S $SSH_AUTH_SOCK ] ; then
             if [ ! -z "$SSH_AGENT_PID" ] && kill -0 $SSH_AGENT_PID ; then

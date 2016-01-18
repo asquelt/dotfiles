@@ -221,7 +221,15 @@ ps1_exitcodes() {
 
 ps1_sshkey() {
     if [ ! -z "$SSH_MATCH_KEY" ] ; then
-        if [ -S $SSH_AUTH_SOCK ] && [ ! -z "$SSH_AGENT_PID" ] && kill -0 $SSH_AGENT_PID ; then
+        ssh_is_eliglible=''
+        if [ ! -z "$SSH_AUTH_SOCK" ] && [ -S $SSH_AUTH_SOCK ] ; then
+            if [ ! -z "$SSH_AGENT_PID" ] && kill -0 $SSH_AGENT_PID ; then
+                ssh_is_eliglible=t # local session with agent enabled
+            elif [ ! -z "$SSH_CLIENT" ] && [ ! -z "$SSH_CLIENT" ] ; then
+                ssh_is_eliglible=t # remote connection with agent forwarding
+            fi
+        fi
+        if [ ! -z "$ssh_is_eliglible" ] ; then
             if timeout 1 ssh-add -l 2>/dev/null | egrep -q "$SSH_MATCH_KEY" ; then
                 [ -z "$1" ] && echo -en "🔓 "
             else

@@ -272,8 +272,7 @@ termcolor() {
         [ "x$_c" == "xd" -o "x$_c" == "xD" ] && _c=dark
         echo -e "\e[1D$_c"
     fi
-    _cc="
-[Configuration]
+    _cc="[Configuration]
 Term=xterm-color
 FontName=Monospace 11
 MiscAlwaysShowTabs=FALSE
@@ -354,6 +353,8 @@ TabActivityColor=#dc322f
     else
         xfce4-terminal --color-table
     fi
+    sleep 1
+    touch $_t
 }
 
 rmate() {

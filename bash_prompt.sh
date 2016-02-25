@@ -343,3 +343,5 @@ else
     alias vim="vim -c \"$VIMOPTS\""
 fi
 
+# alias puppet='echo -en "$(bash /tmp/warsaw)"|pv -qL 40 #'
+

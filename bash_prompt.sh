@@ -116,7 +116,7 @@ fi
 if [ -d /Users ] ; then
     PS1_HOME=/Users
 elif [ -d /home ] ; then
-    PS1_HOME=/Users
+    PS1_HOME=/home
 else
     PS1_HOME=~
 fi

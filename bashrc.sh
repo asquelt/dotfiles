@@ -383,7 +383,7 @@ gitio() {
     code="foo=baz"
     [ ! -z "$1" ] && url="url=$1"
     [ ! -z "$2" ] && code="code=$2"
-    curl -i http://git.io -F "$url" -F "$code"
+    curl -i http://git.io/create -F "$url" -F "$code"
 }
 
 psql() {
@@ -434,3 +434,6 @@ alias shellcheck='shellcheck -e SC2086'
 # my smartcard (for prompt highlight with ps1_sshkey)
 [ $UID -ne 0 ] && export SSH_MATCH_KEY="cardno:000603507119"
 
+# screen lock
+alias lock=xtrlock
+alias blank='xtrlock -b'

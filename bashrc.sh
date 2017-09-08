@@ -437,3 +437,12 @@ alias shellcheck='shellcheck -e SC2086'
 # screen lock
 alias lock=xtrlock
 alias blank='xtrlock -b'
+
+export PATH=$PATH:/home/kondi/bin
+
+alias fixbt='pactl load-module module-bluetooth-discover'
+
+alias ddverbose='dd bs=4M status=progress conv=fsync'
+
+[ -f /home/kondi/lib/azure-cli/az.completion ] && source '/home/kondi/lib/azure-cli/az.completion'
+

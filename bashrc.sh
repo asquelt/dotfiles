@@ -248,8 +248,8 @@ sudo() {
 
 setupgithub() {
     git config user.name asquelt
-    git config user.email asq@asq.art.pl
-    echo "GIT author set to asquelt <asq@asq.art.pl>"
+    git config user.email asq@asq.pm
+    echo "GIT author set to asquelt <asq@asq.pm>"
 }
 
 githubsetup() {
